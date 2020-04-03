@@ -1,6 +1,3 @@
-const User = require('../models/user/userService')
-const Match = require('../models/game/match/matchService')
-const Game = require('../models/game/gameService')
 const UserGame = require('../models/game/userGame/userGameService')
 const YearGame = require('../models/game/yearGame/yearGameService')
 
@@ -17,7 +14,7 @@ module.exports = async (req,res,next)=>{
     }
 
     
-    let userGame = await UserGame.find({ user: params.user})
+    let userGame = await UserGame.find({ user: params.user })
     let id = userGame[0].id
     let year = await YearGame.find({ userGame: id })
     if(Array.isArray(year) && year.length>0){

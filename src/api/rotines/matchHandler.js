@@ -1,6 +1,7 @@
 const MatchController = require('../controller/matchController');
+const UserGameController = require('../controller/userGameController');
 
-const { gameExists, pushMatchIntoUserGame, IsUsergameOnYearDatabase, pushUsergameOnYearDatabase, getUsergame } = require('./Utils')
+const { gameExists, pushMatchIntoUserGame, UserGameIsNotOnYearDatabase, registerRecordGame, ifNotExistsUserGameCreateIt } = require('./Utils');
 
 module.exports = async (req,res,next,points)=>{
     const user_id=req.decoded.user._id || ''
@@ -15,16 +16,13 @@ module.exports = async (req,res,next,points)=>{
     }
 
     if(await gameExists(params_game)){
-        let year;
 
         const match = await MatchController.create(params);
-        const userGame = await getUsergame(params,res)
-        await pushMatchIntoUserGame(userGame,match)
-        if(!await IsUsergameOnYearDatabase(userGame)){
-            await pushUsergameOnYearDatabase(params,year,userGame)
-        }
-        res.send('ok')
-        
+        const userGame = await ifNotExistsUserGameCreateIt(params);
+        await pushMatchIntoUserGame(userGame,match);
+        await registerRecordGame(params.user,params.game,params.points)
+        res.status(200).json({ points })
+
     }else{
         return res.send('Nao existe jogo')
     }

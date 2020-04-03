@@ -1,10 +1,7 @@
 const auth = require('../../middlewares/auth');
-const Year = require('../../../api/models/game/yearGame/yearGameService')
-const find = require('../../../api/rotines/findRegisterInDatabase')
-const matchHandler = require('../../../api/rotines/matchHandler')
-const GameController = require('../../../api/controller/gameController')
-const { getUserHistory } = require('../../../api/rotines/home')
-const { initGame, receiveUserAnswer } = require('../../../api/rotines/gameHandler')
+const matchHandler = require('../../../api/rotines/matchHandler');
+const { getUserRecords } = require('../../../api/rotines/records');
+const { initGame, receiveUserAnswer, findGame } = require('../../../api/rotines/game/gameHandler');
 
 module.exports = (app,express)=>{
 
@@ -13,12 +10,10 @@ module.exports = (app,express)=>{
   protectedAPI.use(auth);
 
   app.use('/api',protectedAPI);
-  Year.register(protectedAPI,'/year');
 
   protectedAPI.get('/match', matchHandler);
-  protectedAPI.get('/find', find);
-  protectedAPI.get('/home',getUserHistory);
-  protectedAPI.get('/game',GameController.findGame);
+  protectedAPI.get('/home',getUserRecords);
+  protectedAPI.get('/game',findGame);
   protectedAPI.get('/gameInfo', initGame);
   protectedAPI.post('/receiveUserAnswer', receiveUserAnswer);
 }

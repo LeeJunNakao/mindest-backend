@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken')
 const env = require('../.env')
-
 module.exports = (req,res,next)=>{
     const token = req.headers.token || req.body.token || req.query.token || ''
     if(req.method==='OPTIONS'){

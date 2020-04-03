@@ -1,135 +1,82 @@
-const Game = require('../models/game/gameService')
-const Match = require('../models/game/match/matchService')
-const YearGame = require('../models/game/yearGame/yearGameService')
-const UserGame = require('../models/game/userGame/userGameService')
+const YearGameController = require('../controller/yearGameController')
+const GameController = require('../controller/gameController');
+const UserGameController = require('../controller/userGameController');
+const RecordGameController = require('../controller/recordGameController');
 
 async function pushMatchIntoUserGame(userGame,match){
     try{
-        await userGame.match.push(match)
-        await userGame.save()
+        await userGame.match.push(match);
+        await userGame.save();
     }catch(err){
-        console.log('erro ao inserir match em UserGame', err)
+        console.log('erro ao inserir match em UserGame', err);
     }
     
 }
 
-async function yearRegisterExists(params){
-    try{
-        const year = await YearGame.find({ year: params.year })
-        if(year.length<1){
-            return false
-        }else{
-            return true
-        }
-    }catch(err){
-        console.log('Erro verificar se ano existe', err)
-    }
-}
-
-async function pushUsergameOnYearDatabase(params,year,userGame){
-    try{
-        if(!await yearRegisterExists(params)){
-            year = await new YearGame({ year: params.year })
-        }else{
-            year = await YearGame.findOne({ year: params.year })
-        }
-
-        await year.userGame.push(userGame._id)
-        await year.save()
-    }catch(err){
-        console.log('erro ao inserir usergame no ano', err)
-    }
-    
-}
-
-
-
-async function IsUsergameOnYearDatabase(userGame){
-    const year = await findYearThatHasUsergame(userGame)
-    if(year.length==0){
-        return false
-    }else{
-        return true
-    }
+async function UserGameIsNotOnYearDatabase(userGame){
+    const year = await findYearThatHasUsergame(userGame);
+    return year.length ==0 ? true : false;
 }
 
 async function findYearThatHasUsergame(userGame){
-    let year=[]
-    try{
-        year = await YearGame.find({ userGame: userGame._id})
-    }catch(err){
-        console.log('Erro ao procurar o ano que contem userGame',err)
-    }
-    return year
+    return await YearGameController.find({ userGame: userGame._id})
 }
-
-async function findDatabase(Model, parameter){
-    let model = []
-    try{
-        model = await Model.find(parameter)
-        if(model.length<1){
-            console.log('menor que 1?')
-        }
-    }catch(e){
-        console.log('ERRO', e)
-    }
-    if(Array.isArray(model)){
-        return model[0]
-    }else{
-        return model
-    }
-}
-
-async function getDatabase(Model,parameter){
-    let model=[]
-    try{
-        model =  await Model.find(parameter)
-        if(model.length<1){
-            model = await new Model( parameter )
-            await model.save()
-        }
-    }catch(e){
-        console.log(e)
-    }
-    if(Array.isArray(model)){
-        return model[0]
-    }else{
-        return model
-    }
-    
-}
-
-async function createMatchRegister(params){
-    const match = await new Match({
-        user: params.user, 
-        difficulty: params.difficulty, 
-        points: params.points,
-        date: params.date
-    })
-    await match.save()
-
-    return match
-}
-   
-
-
 
 async function gameExists(_id){
-    let game=false
-    try{
-        game = await Game.find({ _id })
-        if(game.length>0) return true
-    }catch(err){
-        console.log(err)
+    const game = await GameController.find({ _id })
+    return game ? true : false
+}
+
+async function ifNotExistsUserGameCreateIt(params){
+    const userGame = await UserGameController.find({ user: params.user, game: params.game })
+    if(userGame){
+        return userGame;
+    }else{
+        return await UserGameController.create({ user: params.user, game: params.game});
     }
-    
 }
 
-async function getUsergame(params){
+async function recordGameExistsForUserAndGame(user, game){
+    const recordGame = await RecordGameController.find({ user, 'records.game': game });
 
-    return await getDatabase(UserGame, { user: params.user, game: params.game })
-   
-    
+    return recordGame ? true : false;
 }
 
-module.exports = { getDatabase, gameExists, createMatchRegister, findDatabase, pushMatchIntoUserGame, IsUsergameOnYearDatabase, pushUsergameOnYearDatabase, getUsergame }
+async function recordGameExistsForUserOnly(user,game){
+    const resultForUser = await RecordGameController.find({ user });
+    const resultForUserAndGame = await RecordGameController.find({ user, 'records.game': game })
+
+    return resultForUser && !resultForUserAndGame ? true : false;
+}
+
+async function recordGameNotExistsForUser(user){
+    const result = await RecordGameController.find({ user });
+    return result ? false : true;
+}
+
+async function runRotinesIfRecordExistsForUserAndGame(user,game,points){
+    if(await recordGameExistsForUserAndGame(user, game)){
+        RecordGameController.updateRegister(user,game,points)
+    }
+}
+async function runRotinesIfRecordExistsForUserOnly(user,game,points){
+    if(await recordGameExistsForUserOnly(user,game)){
+        await RecordGameController.addRegister(user,game,points)
+    }
+}
+
+async function runRotinesIfRecordNotExistsForUser(user,game,points){
+    if(await recordGameNotExistsForUser(user)){
+        await RecordGameController.create(user,game,points);
+    }
+}
+
+async function registerRecordGame(user,game,points){
+    runRotinesIfRecordExistsForUserAndGame(user,game,points);
+    runRotinesIfRecordExistsForUserOnly(user,game,points);
+    runRotinesIfRecordNotExistsForUser(user,game,points);
+}
+
+
+
+module.exports = {  gameExists, pushMatchIntoUserGame, UserGameIsNotOnYearDatabase, registerRecordGame, ifNotExistsUserGameCreateIt }
