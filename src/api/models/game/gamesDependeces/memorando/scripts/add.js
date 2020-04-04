@@ -4,15 +4,17 @@ module.exports = mongoose.connect('mongodb://localhost/mindest', {useNewUrlParse
 const fs = require('fs');
 const MemorandoWordList = require('../memorandoWordsListService')
 
+
+
 class Add{
     
     constructor(){
-        this.file = 'data.txt';
+        this.file = process.cwd()+'/src/api/models/game/gamesDependeces/memorando/scripts/data.txt';
         this.encoding='utf8';
     }
 
     readFile(){
-        this.text = fs.readFileSync('data.txt','utf8')
+        this.text = fs.readFileSync(this.file,'utf8')
     }
 
     sendWordsToArray(){
