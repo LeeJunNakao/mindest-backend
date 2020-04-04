@@ -1,16 +1,18 @@
-const mongoose = require('mongoose')
-module.exports = mongoose.connect('mongodb://localhost/mindest', {useNewUrlParser: true,useUnifiedTopology: true,useCreateIndex: true,});
-
 const fs = require('fs');
 const MemorandoWordList = require('../memorandoWordsListService')
-
-
 
 class Add{
     
     constructor(){
         this.file = process.cwd()+'/src/api/models/game/gamesDependeces/memorando/scripts/data.txt';
         this.encoding='utf8';
+    }
+
+    initProcess(){
+        this.readFile();
+        this.sendWordsToArray();
+        this.formatWordsInArray();
+        this.sendArrayWordsToDatabase();
     }
 
     readFile(){
@@ -43,17 +45,11 @@ class Add{
             i++;
         })
     }
-
 }
 
-const add = new Add();
-add.readFile();
-add.sendWordsToArray();
-add.formatWordsInArray();
-add.sendArrayWordsToDatabase();
+module.exports = Add;
 
-// const word = new MemorandoWordList({ word: 'papel'});
-// word.save();
+
 
 
 
