@@ -4,11 +4,9 @@ const AddScript = require('../../api/models/game/gamesDependeces/memorando/scrip
 async function verifyIfMemorandoWordsListExists(){
     try{
       const wordsList = await  MemorandoWordsList.find();
-      if(wordsList.length>0){
-          console.log('lista existente');
-      }else{
-          const addScript = new AddScript();
-          addScript.initProcess();
+      if(wordsList.length<1){
+        const addScript = new AddScript();
+        addScript.initProcess();
       }
     }catch(error){
         console.log(error);
