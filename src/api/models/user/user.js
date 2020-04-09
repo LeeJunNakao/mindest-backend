@@ -5,7 +5,7 @@ let User = new mongoose.Schema({
     email: { type: String, required: true},
     password: { type: String, required: true },
     authorization: {type: String, enum: ['admin','moderator','user'], required: false},
-    avatar: { type: String, default: 'http://localhost:3000/api/static/images/system/avatar_default.png'}
+    avatar: { type: String, default: 'http://localhost:3000/static/images/system/avatar_default.png'}
 })
 
 module.exports = User

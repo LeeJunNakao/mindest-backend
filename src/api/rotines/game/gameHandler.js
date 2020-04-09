@@ -25,10 +25,7 @@ function receiveUserAnswer(req,res,next){
 function calculatePoints(gameItens, answerItens){
   let points=0
   for(let i=0; i<gameItens.length; i++){
-    console.log("game item", i, gameItens[i])
-    console.log("aswer item", i, answerItens[i])
     if(gameItens[i]==answerItens[i]) points++
-    console.log(points)
   }
 return points
 }

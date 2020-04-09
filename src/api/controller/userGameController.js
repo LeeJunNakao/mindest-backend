@@ -4,7 +4,7 @@ class UserGameController{
 
     static async find(params){
         try{
-            return await UserGame.findOne({ user: params.user, game: params.game});
+            return await UserGame.findOne(params);
         }catch(error){
             console.log('Erro ao buscar UserGame', error);
         }

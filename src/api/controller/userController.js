@@ -22,6 +22,16 @@ class UserController{
             return { response: 'error '}
         }
     }
+
+    static async getUserInfo(_id){
+        try {
+            const user = await User.findOne({ _id });
+            return { response: 'success', user}
+        } catch (error) {
+            console.log('Erro ao buscar as informações em User',error)
+            return { response: 'error'}
+        }
+    }
 }
 
 module.exports = UserController;
